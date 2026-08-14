@@ -1,0 +1,244 @@
+{
+  "info": {
+    "name": "AI Airline Booking Bot API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "pnr", "value": "" },
+    { "key": "bookingId", "value": "" },
+    { "key": "flightId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Puneet Bhargava\",\n  \"email\": \"puneet@example.com\",\n  \"phone\": \"+919999999999\",\n  \"password\": \"Passw0rd!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"puneet@example.com\",\n  \"password\": \"Passw0rd!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flights",
+      "item": [
+        {
+          "name": "Search Flights",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/flights/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origin\": \"DEL\",\n  \"destination\": \"DXB\",\n  \"departureDate\": \"2026-09-01\",\n  \"passengers\": 1,\n  \"cabinClass\": \"ECONOMY\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Flight by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/flights/{{flightId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.pnr) pm.collectionVariables.set('pnr', data.pnr);",
+                  "if (data.bookingId) pm.collectionVariables.set('bookingId', data.bookingId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/bookings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flightId\": \"{{flightId}}\",\n  \"passenger\": {\n    \"firstName\": \"Puneet\",\n    \"lastName\": \"Bhargava\",\n    \"email\": \"puneet@example.com\",\n    \"phone\": \"+919999999999\",\n    \"dateOfBirth\": \"1990-01-01\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Booking by Booking ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Get Booking by PNR",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/api/bookings/pnr/{{pnr}}"
+          }
+        },
+        {
+          "name": "Booking History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/history?status=CONFIRMED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "history"],
+              "query": [{ "key": "status", "value": "CONFIRMED" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check-in",
+      "item": [
+        {
+          "name": "Web Check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/checkin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pnr\": \"{{pnr}}\",\n  \"lastName\": \"Bhargava\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Chat - Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/chat",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I want to fly from Delhi to Dubai tomorrow\",\n  \"sessionId\": \"sess-demo-1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat - Book selection",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/chat",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Book the first one\",\n  \"sessionId\": \"sess-demo-1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat - Booking History",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/chat",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Show my previous bookings\",\n  \"sessionId\": \"sess-demo-2\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Chat - Check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/api/chat",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Check me in\",\n  \"sessionId\": \"sess-demo-3\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

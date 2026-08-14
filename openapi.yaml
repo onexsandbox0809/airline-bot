@@ -1,0 +1,203 @@
+openapi: 3.0.3
+info:
+  title: AI Airline Booking Bot API
+  version: 1.0.0
+  description: Backend API for an AI-powered airline booking chatbot.
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                password: { type: string }
+      responses:
+        '201': { description: User created, with JWT token }
+        '409': { description: User already exists }
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: JWT token }
+        '401': { description: Invalid credentials }
+  /auth/me:
+    get:
+      summary: Get current authenticated user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Current user }
+        '401': { description: Unauthorized }
+  /flights/search:
+    post:
+      summary: Search flights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [origin, destination, departureDate]
+              properties:
+                origin: { type: string, example: DEL }
+                destination: { type: string, example: DXB }
+                departureDate: { type: string, example: '2026-08-20' }
+                returnDate: { type: string, nullable: true }
+                passengers: { type: integer, example: 1 }
+                cabinClass: { type: string, example: ECONOMY }
+      responses:
+        '200': { description: List of matching flights }
+        '400': { description: Invalid request }
+  /flights/{id}:
+    get:
+      summary: Get a single flight by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Flight details }
+        '404': { description: Flight not found }
+  /bookings:
+    post:
+      summary: Create a booking
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flightId, passenger]
+              properties:
+                flightId: { type: string }
+                passenger:
+                  type: object
+                  required: [firstName, lastName, email, phone, dateOfBirth]
+                  properties:
+                    firstName: { type: string }
+                    lastName: { type: string }
+                    email: { type: string }
+                    phone: { type: string }
+                    dateOfBirth: { type: string }
+      responses:
+        '201': { description: Booking confirmed }
+        '404': { description: Flight not found }
+        '409': { description: No seats available }
+  /bookings/history:
+    get:
+      summary: Get authenticated user's booking history
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: fromDate
+          schema: { type: string }
+        - in: query
+          name: toDate
+          schema: { type: string }
+        - in: query
+          name: destination
+          schema: { type: string }
+      responses:
+        '200': { description: List of bookings }
+  /bookings/pnr/{pnr}:
+    get:
+      summary: Get booking by PNR
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: pnr
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Booking details }
+        '404': { description: Invalid PNR }
+  /bookings/{bookingId}:
+    get:
+      summary: Get booking by booking ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: bookingId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Booking details }
+        '404': { description: Booking not found }
+  /checkin:
+    post:
+      summary: Perform web check-in
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pnr, lastName]
+              properties:
+                pnr: { type: string }
+                lastName: { type: string }
+      responses:
+        '200': { description: Check-in completed }
+        '404': { description: Invalid PNR }
+        '409': { description: Check-in not available / closed / already checked in }
+  /chat:
+    post:
+      summary: Main conversational endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, sessionId]
+              properties:
+                userId: { type: string }
+                message: { type: string }
+                sessionId: { type: string }
+      responses:
+        '200': { description: AI response with detected intent and data }
