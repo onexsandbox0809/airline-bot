@@ -1,0 +1,98 @@
+{
+  "info": {
+    "name": "Airline Bot API",
+    "description": "Demo airline backend - open APIs, no auth. Set base_url to your Vercel deployment or http://localhost:3000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "user_id", "value": "" },
+    { "key": "flight_id", "value": "" },
+    { "key": "pnr", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": { "method": "GET", "url": "{{base_url}}/api/health" }
+    },
+    {
+      "name": "List Users",
+      "request": { "method": "GET", "url": "{{base_url}}/api/users" }
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Demo User\",\n  \"email\": \"demo.user@example.com\",\n  \"phone\": \"+919999999999\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Search Flights (DEL -> BOM)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/flights/search?origin=DEL&destination=BOM&departureDate=2026-09-15&passengers=1&cabinClass=ECONOMY",
+          "query": [
+            { "key": "origin", "value": "DEL" },
+            { "key": "destination", "value": "BOM" },
+            { "key": "departureDate", "value": "2026-09-15" },
+            { "key": "passengers", "value": "1" },
+            { "key": "cabinClass", "value": "ECONOMY" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Flight Details",
+      "request": { "method": "GET", "url": "{{base_url}}/api/flights/{{flight_id}}" }
+    },
+    {
+      "name": "Create Booking",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/bookings",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"flightId\": \"{{flight_id}}\",\n  \"userId\": \"{{user_id}}\",\n  \"cabinClass\": \"ECONOMY\",\n  \"passengers\": [\n    {\n      \"firstName\": \"Puneet\",\n      \"lastName\": \"Bhargava\",\n      \"dateOfBirth\": \"1990-01-01\",\n      \"gender\": \"MALE\",\n      \"email\": \"user@example.com\",\n      \"phone\": \"+919999999999\",\n      \"passportNumber\": null\n    }\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Booking by PNR",
+      "request": { "method": "GET", "url": "{{base_url}}/api/bookings/{{pnr}}" }
+    },
+    {
+      "name": "Booking History",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/bookings/history/{{user_id}}?page=1&limit=10"
+      }
+    },
+    {
+      "name": "Web Check-in",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/checkin",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pnr\": \"{{pnr}}\",\n  \"lastName\": \"Bhargava\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Boarding Pass",
+      "request": { "method": "GET", "url": "{{base_url}}/api/checkin/{{pnr}}/boarding-pass" }
+    },
+    {
+      "name": "Cancel Booking",
+      "request": { "method": "POST", "url": "{{base_url}}/api/bookings/{{pnr}}/cancel" }
+    }
+  ]
+}
